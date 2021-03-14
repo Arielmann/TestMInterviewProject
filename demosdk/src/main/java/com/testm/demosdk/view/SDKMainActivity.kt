@@ -7,13 +7,12 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.zxing.integration.android.IntentIntegrator
 import com.testm.demosdk.R
+import com.testm.demosdk.audioplayer.AudioPlayer
 import com.testm.demosdk.databinding.ActivitySdkMainBinding
 import com.testm.demosdk.events.DemoSDKEvent
-import com.testm.demosdk.model.AudioData
 import com.testm.demosdk.viewmodel.SDKViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -45,6 +44,7 @@ class SDKMainActivity : AppCompatActivity() {
         integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
         integrator.setPrompt(getString(R.string.scan_a_barcode))
         integrator.setCameraId(0) // Use a specific camera of the device
+        integrator.setBeepEnabled(false)
         integrator.initiateScan()
     }
 
@@ -58,7 +58,7 @@ class SDKMainActivity : AppCompatActivity() {
      * When the observer is activated, it's data will be displayed in the audio files list
      */
     private fun setupDataObservation() {
-        sdkViewModel.audioFiles.observe(this, Observer<List<AudioData>> { audioFiles ->
+        sdkViewModel.audioFiles.observe(this, { audioFiles ->
             audioFiles?.let {
                 Log.d(TAG, "Audio file data received from viewModel")
                 audioDataAdapter.submitList(ArrayList(audioFiles))
@@ -66,19 +66,21 @@ class SDKMainActivity : AppCompatActivity() {
         })
 
         observeErrorEvent(sdkViewModel.qrCodeScanErrorEvent, getString(R.string.error_qr_scan_failed))
-        observeErrorEvent(sdkViewModel.audioDataDownloadErrorEvent, getString(R.string.error_audio_data_fetch_failed))
+        observeErrorEvent(sdkViewModel.audioDataListDownloadErrorEvent, getString(R.string.error_audio_data_fetch_failed))
 
     }
 
-    private fun observeErrorEvent(errorEvent: MutableLiveData<DemoSDKEvent>, errorMsg : String = getString(R.string.error_unknown_failure)) {
-        errorEvent.observe(this, Observer<DemoSDKEvent> { event ->
+    private fun observeErrorEvent(errorEvent: MutableLiveData<DemoSDKEvent>,
+                                  errorMsg: String = getString(R.string.error_unknown_failure)) {
+        errorEvent.observe(this, { event ->
             event?.let {
                 if (event.message.isNotBlank()) {
                     Toast.makeText(this, event.message, Toast.LENGTH_LONG).show()
-                }else{
+                } else {
                     Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show()
                 }
-            } ?: Toast.makeText(this, getString(R.string.error_null_event), Toast.LENGTH_LONG).show()
+            } ?: Toast.makeText(this, getString(R.string.error_null_event), Toast.LENGTH_LONG)
+                .show()
         })
     }
 
@@ -90,6 +92,7 @@ class SDKMainActivity : AppCompatActivity() {
 
         audioDataAdapter.onItemClickListener = { audioData ->
             Log.d(TAG, "Playing audio")
+            AudioPlayer.play(audioData.name)
         }
 
         binding.audioDataRV.apply {

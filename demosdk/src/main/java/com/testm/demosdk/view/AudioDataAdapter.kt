@@ -6,26 +6,26 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.testm.demosdk.adapterhelpers.DefaultDiffUtilCallback
 import com.testm.demosdk.databinding.VhAudioDataListBinding
-import com.testm.demosdk.model.AudioData
+import com.testm.demosdk.model.AudioFileData
 import java.lang.ref.WeakReference
 
 /**
- * Adapter for managing the display of the [AudioData]
+ * Adapter for managing the display of the [AudioFileData]
  */
-class AudioDataAdapter(context: Context) : androidx.recyclerview.widget.ListAdapter<AudioData, AudioDataAdapter.AudioDataViewHolder>(DefaultDiffUtilCallback<AudioData>()) {
+class AudioDataAdapter(context: Context) : androidx.recyclerview.widget.ListAdapter<AudioFileData, AudioDataAdapter.AudioDataViewHolder>(DefaultDiffUtilCallback<AudioFileData>()) {
 
     companion object {
         val TAG: String = AudioDataAdapter::class.simpleName!!
     }
 
     private val weakContext: WeakReference<Context> = WeakReference(context)
-    lateinit var onItemClickListener: (stock: AudioData) -> Unit
+    lateinit var onItemClickListener: (stock: AudioFileData) -> Unit
 
     inner class AudioDataViewHolder(private val binding: VhAudioDataListBinding) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(audioData: AudioData) {
-            binding.audioDataListViewHolderNameTV.text = audioData.name
-            binding.root.setOnClickListener { onItemClickListener.invoke(audioData) }
+        fun bind(audioFileData: AudioFileData) {
+            binding.audioDataListViewHolderNameTV.text = audioFileData.name
+            binding.root.setOnClickListener { onItemClickListener.invoke(audioFileData) }
         }
 
     }

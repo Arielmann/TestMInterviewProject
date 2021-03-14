@@ -4,6 +4,6 @@ interface NetworkCallback<E> {
 
     fun onSuccess(result: E)
 
-    fun onFailure(message: String)
+    fun onFailure(error: String)
 
 }

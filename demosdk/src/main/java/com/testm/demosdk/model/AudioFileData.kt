@@ -6,11 +6,13 @@ import com.testm.demosdk.adapterhelpers.ObjectIdentifier
 /**
  * A model representing data about an audio file within a remote server
  */
-data class AudioData (
+data class AudioFileData (
 	@SerializedName("id") val id : Int,
 	@SerializedName("name") val name : String,
 	@SerializedName("url") val url : String
 )  : ObjectIdentifier{
+
+	var localFilePath = ""
 
 	override fun getUniqueProperty(): String {
 		return id.toString()

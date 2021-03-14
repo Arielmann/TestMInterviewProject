@@ -5,3 +5,4 @@ documentation
 search for warnings
 remove the word stock completly by searching it
 remove commented code
+remove <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
