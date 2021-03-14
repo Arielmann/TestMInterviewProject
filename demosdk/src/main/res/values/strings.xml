@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">InterviewProjectSDK</string>
+
+    <!--Readable text-->
+    <string name="cancelled">Cancelled</string>
+    <string name="scan_a_barcode">Scan a barcode</string>
+    <string name="error_null_event">A null error event was sent</string>
+    <string name="error_unknown_failure">An unknown error has occurred</string>
+    <string name="error_qr_scan_failed">The QR barcode scan process failed</string>
+    <string name="error_audio_data_fetch_failed">Error: could not download audio files data</string>
+</resources>
