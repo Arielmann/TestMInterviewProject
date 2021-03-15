@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.testm.demosdk.utils.Utils
 import com.google.zxing.integration.android.IntentIntegrator
-import com.testm.demosdk.audioplayer.AudioPlayer
 import com.testm.demosdk.events.DemoSDKEvent
 import com.testm.demosdk.model.AudioFileData
 import com.testm.demosdk.network.NetworkCallback
@@ -27,7 +26,7 @@ class SDKViewModel @Inject constructor(private val audioDataRepository: AudioFil
         private val TAG: String? = SDKViewModel::class.java.simpleName
     }
 
-    val audioFiles: MutableLiveData<List<AudioFileData>> = MutableLiveData(mutableListOf())
+    val audioFiles: MutableLiveData<MutableMap<String, AudioFileData>> = MutableLiveData(mutableMapOf())
     val qrCodeScanErrorEvent = MutableLiveData<DemoSDKEvent>()
     val audioDataListDownloadErrorEvent = MutableLiveData<DemoSDKEvent>()
 
@@ -69,17 +68,25 @@ class SDKViewModel @Inject constructor(private val audioDataRepository: AudioFil
         }
     }
 
-    private fun downloadAudioFiles(result: List<AudioFileData>) {
+    /**
+     * Downloads the audio files from the URLs located in the audio data list
+     *
+     * @param filesData Data list of the target files
+     */
+    private fun downloadAudioFiles(filesData: List<AudioFileData>) {
         Log.d(TAG, "downloadAudioFiles")
 
-        result.forEach { audioFileData ->
+        filesData.forEach { audioFileData ->
             viewModelScope.launch(Dispatchers.IO) {
+
                 audioDataRepository.downloadAudioFile(audioFileData, object :
                     NetworkCallback<ResponseBody> {
                     override fun onSuccess(result: ResponseBody) {
-                        audioFileData.localFilePath = Utils.saveAudioFile(result, audioFileData)
-                        if (isAudioFileValid(audioFileData)) {
-                            notifyNewAudioFileAvailable(audioFileData)
+                        viewModelScope.launch(Dispatchers.IO) {
+                            val isFileSaved = Utils.saveAudioFile(result, audioFileData.name)
+                            if (isFileSaved && !audioFiles.value!!.containsKey(audioFileData.url)) {
+                                notifyNewAudioFileAvailable(audioFileData)
+                            }
                         }
                     }
 
@@ -92,24 +99,9 @@ class SDKViewModel @Inject constructor(private val audioDataRepository: AudioFil
     }
 
     private fun notifyNewAudioFileAvailable(audioFileData: AudioFileData) {
-        val updatedAudioFilesList: MutableList<AudioFileData> = mutableListOf()
-        updatedAudioFilesList.addAll(audioFiles.value!!)
-        updatedAudioFilesList.add(audioFileData)
-        audioFiles.postValue(updatedAudioFilesList)
-    }
-
-    private fun isAudioFileValid(audioFileData: AudioFileData): Boolean {
-        if (audioFileData.localFilePath.isEmpty()) {
-            Log.w(TAG, "Audio file is invalid because it isn't saved correctly on device")
-            return false
-        }
-
-        /*if (AudioPlayer.isFilePlayable(audioFileData)) {
-            Log.w(TAG, "Audio file is invalid because it isn't playable")
-            return false
-        }*/
-
-        return true
+        Log.d(TAG, "${audioFileData.name} will be added to playlist list")
+        audioFiles.value!![audioFileData.url] = audioFileData
+        audioFiles.postValue(audioFiles.value!!)
     }
 
 }

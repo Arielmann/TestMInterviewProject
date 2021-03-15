@@ -3,7 +3,7 @@ package com.testm.demosdk.view
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.MutableLiveData
@@ -27,12 +27,15 @@ class SDKMainActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySdkMainBinding
     private val sdkViewModel: SDKViewModel by viewModels()
 
+    private val onRestartClickListener = View.OnClickListener { startQRScan() }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySdkMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupAudioFilesList()
         setupDataObservation()
+        binding.restartProcessIV.setOnClickListener(onRestartClickListener)
         startQRScan()
     }
 
@@ -46,11 +49,13 @@ class SDKMainActivity : AppCompatActivity() {
         integrator.setCameraId(0) // Use a specific camera of the device
         integrator.setBeepEnabled(false)
         integrator.initiateScan()
+        showProgressionUI()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         sdkViewModel.handleQRScanResults(requestCode, resultCode, data)
+        binding.progressBar.show()
     }
 
     /**
@@ -61,13 +66,25 @@ class SDKMainActivity : AppCompatActivity() {
         sdkViewModel.audioFiles.observe(this, { audioFiles ->
             audioFiles?.let {
                 Log.d(TAG, "Audio file data received from viewModel")
-                audioDataAdapter.submitList(ArrayList(audioFiles))
+                audioDataAdapter.submitList(audioFiles.values.toList())
+                hideProgressionUI()
             } ?: Log.w(TAG, "No audio data received")
         })
 
         observeErrorEvent(sdkViewModel.qrCodeScanErrorEvent, getString(R.string.error_qr_scan_failed))
         observeErrorEvent(sdkViewModel.audioDataListDownloadErrorEvent, getString(R.string.error_audio_data_fetch_failed))
+    }
 
+    private fun showProgressionUI() {
+        binding.progressBar.show()
+        binding.restartProcessIV.visibility = View.INVISIBLE
+        binding.errorTV.visibility = View.INVISIBLE
+    }
+
+    private fun hideProgressionUI() {
+        binding.progressBar.hide()
+        binding.errorTV.visibility = View.INVISIBLE
+        binding.restartProcessIV.visibility = View.INVISIBLE
     }
 
     private fun observeErrorEvent(errorEvent: MutableLiveData<DemoSDKEvent>,
@@ -75,12 +92,11 @@ class SDKMainActivity : AppCompatActivity() {
         errorEvent.observe(this, { event ->
             event?.let {
                 if (event.message.isNotBlank()) {
-                    Toast.makeText(this, event.message, Toast.LENGTH_LONG).show()
+                    onDataDisplayRequestError(event.message)
                 } else {
-                    Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show()
+                    onDataDisplayRequestError(errorMsg)
                 }
-            } ?: Toast.makeText(this, getString(R.string.error_null_event), Toast.LENGTH_LONG)
-                .show()
+            } ?: onDataDisplayRequestError(getString(R.string.error_null_event))
         })
     }
 
@@ -89,15 +105,27 @@ class SDKMainActivity : AppCompatActivity() {
      */
     private fun setupAudioFilesList() {
         audioDataAdapter = AudioDataAdapter(this)
+        audioDataAdapter.setHasStableIds(true)
 
         audioDataAdapter.onItemClickListener = { audioData ->
-            Log.d(TAG, "Playing audio")
-            AudioPlayer.play(audioData.name)
+            AudioPlayer.onAudioFileClicked(audioData)
+//            sdkViewModel.onAudioFileClicked(audioData)
         }
 
         binding.audioDataRV.apply {
             adapter = audioDataAdapter
             layoutManager = LinearLayoutManager(this@SDKMainActivity)
         }
+    }
+
+    /**
+     * Displayed whenever the image request operation ends with an error
+     */
+    private fun onDataDisplayRequestError(errorMsg: String) {
+        Log.e(TAG, errorMsg)
+        binding.progressBar.hide()
+        binding.errorTV.visibility = View.VISIBLE
+        binding.restartProcessIV.visibility = View.VISIBLE
+        binding.restartProcessIV.setImageResource(R.drawable.ic_baseline_refresh_gray_48)
     }
 }

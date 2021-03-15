@@ -16,9 +16,7 @@
         android:id="@+id/audioDataListViewHolderCL"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="top"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:gravity="start|center_vertical"
         card:layout_constraintEnd_toEndOf="parent"
@@ -29,15 +27,45 @@
             android:id="@+id/audioDataListViewHolderNameTV"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textSize="17sp"
             android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
             android:maxHeight="150dp"
-            android:text="Stock Name"
+            android:text="File Name"
             android:textAlignment="gravity"
+            android:textSize="17sp"
             android:textStyle="bold"
+            card:layout_constraintEnd_toStartOf="@+id/audioDataViewHolderPlayPauseIV"
             card:layout_constraintStart_toStartOf="parent"
             card:layout_constraintTop_toTopOf="parent"
             tools:ignore="HardcodedText" />
+
+        <TextView
+            android:id="@+id/audioDataListViewHolderURLTV"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:maxHeight="150dp"
+            android:text="url.wav"
+            android:textAlignment="gravity"
+            android:textSize="13sp"
+            card:layout_constraintBottom_toBottomOf="parent"
+            card:layout_constraintEnd_toEndOf="@+id/audioDataListViewHolderNameTV"
+            card:layout_constraintStart_toStartOf="parent"
+            card:layout_constraintTop_toBottomOf="@+id/audioDataListViewHolderNameTV"
+            tools:ignore="HardcodedText" />
+
+        <ImageView
+            android:id="@+id/audioDataViewHolderPlayPauseIV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            card:layout_constraintBottom_toBottomOf="parent"
+            card:layout_constraintEnd_toEndOf="parent"
+            card:layout_constraintTop_toTopOf="parent"
+            android:src="@drawable/ic_play_black" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

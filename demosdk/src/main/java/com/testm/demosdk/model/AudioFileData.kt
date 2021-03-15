@@ -12,8 +12,6 @@ data class AudioFileData (
 	@SerializedName("url") val url : String
 )  : ObjectIdentifier{
 
-	var localFilePath = ""
-
 	override fun getUniqueProperty(): String {
 		return id.toString()
 	}

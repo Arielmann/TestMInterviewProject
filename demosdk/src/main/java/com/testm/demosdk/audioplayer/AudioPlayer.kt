@@ -1,10 +1,7 @@
 package com.testm.demosdk.audioplayer
 
-import android.content.Context
-import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
-import android.net.Uri
-import com.testm.demosdk.app.DemoSDKApp
+import android.util.Log
 import com.testm.demosdk.model.AudioFileData
 import com.testm.demosdk.utils.Utils
 import java.io.File
@@ -12,31 +9,59 @@ import java.io.File
 
 object AudioPlayer {
 
+    private val TAG = AudioPlayer::class.java.simpleName
     private val AUDIO_FILES_PATH = Utils.getAudioFilesParentDir().absolutePath
+    private var mp: MediaPlayer? = null
+    private var currentlyPlayedFile: AudioFileData? = null
 
-    fun play(audioFileName: String) {
+    fun onAudioFileClicked(audioFileData: AudioFileData) {
+        if (currentlyPlayedFile == audioFileData) {
+            if (mp!= null && mp!!.isPlaying) {
+                pause()
+            }
+            return
+        } else {
+            release()
+            play(audioFileData)
+        }
+    }
+
+    private fun play(audioFileData: AudioFileData) {
         //set up MediaPlayer
-        val mp = MediaPlayer()
+
         try {
-            mp.setDataSource(AUDIO_FILES_PATH + File.separator.toString() + audioFileName)
-            mp.prepare()
-            mp.start()
+            Log.d(TAG, "Creating media player")
+            mp = MediaPlayer()
+            Log.d(TAG, "Setting data source for media player")
+            mp!!.setDataSource(AUDIO_FILES_PATH + File.separator.toString() + audioFileData.name)
+            Log.d(TAG, "Preaparing")
+            mp!!.prepare()
+            Log.d(TAG, "Starting media player")
+            mp!!.start()
+            currentlyPlayedFile = audioFileData
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    fun isFilePlayable(audioFileData : AudioFileData): Boolean {
-        val retriever = MediaMetadataRetriever()
+    private fun pause() {
         try {
-            retriever.setDataSource(DemoSDKApp.context, Uri.parse(audioFileData.localFilePath))
-        } catch (e: java.lang.Exception) {
+            Log.d(TAG, "Pausing media player")
+            mp?.pause()
+            currentlyPlayedFile = null
+        } catch (e: Exception) {
             e.printStackTrace()
-            return false
         }
-        val hasAudio = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO)
-        retriever.close()
-        return "yes" == hasAudio
+    }
+
+    private fun release() {
+        try {
+            Log.d(TAG, "Stopping media player")
+            mp?.release()
+            currentlyPlayedFile = null
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
 }

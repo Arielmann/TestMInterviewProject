@@ -1,14 +1,17 @@
 package com.testm.demosdk.utils
 
+import android.R.attr.data
 import android.content.Context
+import android.content.ContextWrapper
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import com.testm.demosdk.app.DemoSDKApp
-import com.testm.demosdk.model.AudioFileData
 import okhttp3.ResponseBody
 import java.io.*
+
 
 object Utils {
 
@@ -44,39 +47,35 @@ object Utils {
         return false
     }
 
+    /**
+     * Saving an audio file to the device's cache
+     *
+     * @param body The body containing the file's data
+     * @param fileName Name of the saved file
+     *
+     * @return true if the file was successfully saved
+     */
+    fun saveAudioFile(body: ResponseBody, fileName: String): Boolean {
 
-    fun saveAudioFile(body: ResponseBody, audioFileData: AudioFileData): String {
-        val parentDir = getAudioFilesParentDir()
-        val audioFile = File(parentDir, audioFileData.name)
-
-        var input: InputStream? = null
         try {
-            input = body.byteStream()
-            val fos = FileOutputStream(audioFile)
-            fos.use { output ->
-                val buffer = ByteArray(4 * 1024)
-                var read: Int
-                while (input.read(buffer).also { read = it } != -1) {
-                    output.write(buffer, 0, read)
-                }
-                output.flush()
+
+            DemoSDKApp.context.openFileOutput(fileName, Context.MODE_PRIVATE).use {
+                it.write(body.bytes())
             }
-            Log.d(TAG, "Audio file ${audioFileData.name} saved in path: ${audioFile.absolutePath}")
-            return audioFile.absolutePath
-        } catch (e: Exception) {
-            Log.e(TAG, e.toString())
-        } finally {
-            input?.close()
+            Log.d(TAG, "Audio file $fileName saved in path: $fileName")
+            return true
+
+        } catch (e: java.lang.Exception) {
+            // TODO Auto-generated catch block
+            e.printStackTrace()
         }
-        return ""
+        Log.e(TAG, "Error in file saving for file $fileName")
+        return false
     }
 
+
     fun getAudioFilesParentDir(): File {
-        val parentDir = File(DemoSDKApp.context.cacheDir.toString() + "/Audio_Files/")
-        if (!parentDir.exists()) {
-            parentDir.mkdirs()
-        }
-        return parentDir
+        return DemoSDKApp.context.filesDir
     }
 
 }
