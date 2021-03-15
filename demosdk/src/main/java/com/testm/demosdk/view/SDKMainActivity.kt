@@ -73,6 +73,7 @@ class SDKMainActivity : AppCompatActivity() {
 
         observeErrorEvent(sdkViewModel.qrCodeScanErrorEvent, getString(R.string.error_qr_scan_failed))
         observeErrorEvent(sdkViewModel.audioDataListDownloadErrorEvent, getString(R.string.error_audio_data_fetch_failed))
+        observeErrorEvent(sdkViewModel.scanCanceledEvent, getString(R.string.event_message_scan_cancelled))
     }
 
     private fun showProgressionUI() {
@@ -87,16 +88,15 @@ class SDKMainActivity : AppCompatActivity() {
         binding.restartProcessIV.visibility = View.INVISIBLE
     }
 
-    private fun observeErrorEvent(errorEvent: MutableLiveData<DemoSDKEvent>,
-                                  errorMsg: String = getString(R.string.error_unknown_failure)) {
+    private fun observeErrorEvent(errorEvent: MutableLiveData<DemoSDKEvent>, errorMsg: String = getString(R.string.error_unknown_failure)) {
         errorEvent.observe(this, { event ->
             event?.let {
                 if (event.message.isNotBlank()) {
-                    onDataDisplayRequestError(event.message)
+                    onDataDisplayRequestFailed(event.message)
                 } else {
-                    onDataDisplayRequestError(errorMsg)
+                    onDataDisplayRequestFailed(errorMsg)
                 }
-            } ?: onDataDisplayRequestError(getString(R.string.error_null_event))
+            } ?: onDataDisplayRequestFailed(getString(R.string.error_null_event))
         })
     }
 
@@ -121,9 +121,10 @@ class SDKMainActivity : AppCompatActivity() {
     /**
      * Displayed whenever the image request operation ends with an error
      */
-    private fun onDataDisplayRequestError(errorMsg: String) {
-        Log.e(TAG, errorMsg)
+    private fun onDataDisplayRequestFailed(reason: String) {
+        Log.d(TAG, reason)
         binding.progressBar.hide()
+        binding.errorTV.text = reason
         binding.errorTV.visibility = View.VISIBLE
         binding.restartProcessIV.visibility = View.VISIBLE
         binding.restartProcessIV.setImageResource(R.drawable.ic_baseline_refresh_gray_48)

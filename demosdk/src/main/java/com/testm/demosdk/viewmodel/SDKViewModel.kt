@@ -27,6 +27,7 @@ class SDKViewModel @Inject constructor(private val audioDataRepository: AudioFil
     }
 
     val audioFiles: MutableLiveData<MutableMap<String, AudioFileData>> = MutableLiveData(mutableMapOf())
+    val scanCanceledEvent = MutableLiveData<DemoSDKEvent>()
     val qrCodeScanErrorEvent = MutableLiveData<DemoSDKEvent>()
     val audioDataListDownloadErrorEvent = MutableLiveData<DemoSDKEvent>()
 
@@ -42,8 +43,7 @@ class SDKViewModel @Inject constructor(private val audioDataRepository: AudioFil
                 Log.d(TAG, "Scan successful. Result URL: $qruUrl")
                 requestAudioDataList(qruUrl)
             } else {
-                Log.d(SDKMainActivity.TAG, "Scan cancelled")
-                qrCodeScanErrorEvent.postValue(DemoSDKEvent())
+                scanCanceledEvent.postValue(DemoSDKEvent())
             }
         }
     }

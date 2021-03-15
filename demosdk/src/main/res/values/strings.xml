@@ -8,5 +8,6 @@
     <string name="error_unknown_failure">An unknown error has occurred</string>
     <string name="error_qr_scan_failed">The QR barcode scan process failed</string>
     <string name="error_audio_data_fetch_failed">Error: could not download audio files data list</string>
+    <string name="event_message_scan_cancelled">Scan cancelled</string>
     <string name="error_cannot_play_audio">Cannot play audio file, please restart the app and try again</string>
 </resources>

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/grayFade"
     tools:context=".view.SDKMainActivity">
 
     <androidx.recyclerview.widget.RecyclerView
@@ -35,7 +36,7 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:indeterminate="true"
-        android:indeterminateTint="@android:color/holo_blue_dark"
+        android:indeterminateTint="@android:color/holo_red_dark"
         android:max="100"
         android:minWidth="200dp"
         android:minHeight="50dp"

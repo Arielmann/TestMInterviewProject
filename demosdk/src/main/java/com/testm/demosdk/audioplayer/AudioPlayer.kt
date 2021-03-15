@@ -34,7 +34,7 @@ object AudioPlayer {
             mp = MediaPlayer()
             Log.d(TAG, "Setting data source for media player")
             mp!!.setDataSource(AUDIO_FILES_PATH + File.separator.toString() + audioFileData.name)
-            Log.d(TAG, "Preaparing")
+            Log.d(TAG, "Preparing media player")
             mp!!.prepare()
             Log.d(TAG, "Starting media player")
             mp!!.start()

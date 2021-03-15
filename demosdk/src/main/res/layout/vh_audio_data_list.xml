@@ -35,6 +35,7 @@
             android:textAlignment="gravity"
             android:textSize="17sp"
             android:textStyle="bold"
+            android:textColor="@color/black"
             card:layout_constraintEnd_toStartOf="@+id/audioDataViewHolderPlayPauseIV"
             card:layout_constraintStart_toStartOf="parent"
             card:layout_constraintTop_toTopOf="parent"
