@@ -1,5 +1,3 @@
 package com.testm.demosdk.events
 
-class DemoSDKEvent(var message: String = "") {
-
-}
+class DemoSDKEvent(var message: String = "")

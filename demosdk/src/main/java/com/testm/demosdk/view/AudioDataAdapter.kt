@@ -1,8 +1,11 @@
 package com.testm.demosdk.view
 
 import android.content.Context
+import android.media.MediaPlayer
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.testm.demosdk.R
 import com.testm.demosdk.adapterhelpers.DefaultDiffUtilCallback
@@ -13,8 +16,7 @@ import java.lang.ref.WeakReference
 /**
  * Adapter for managing the display of the [AudioFileData]
  */
-class AudioDataAdapter(context: Context) :
-    androidx.recyclerview.widget.ListAdapter<AudioFileData, AudioDataAdapter.AudioDataViewHolder>(DefaultDiffUtilCallback<AudioFileData>()) {
+class AudioDataAdapter(context: Context) : ListAdapter<AudioFileData, AudioDataAdapter.AudioDataViewHolder>(DefaultDiffUtilCallback<AudioFileData>()) {
 
     companion object {
         val TAG: String = AudioDataAdapter::class.simpleName!!
@@ -23,10 +25,16 @@ class AudioDataAdapter(context: Context) :
     private var currentlyPlayingViewHolder: AudioDataViewHolder? = null
     private var currentlyPlayedAudio: AudioFileData? = null
     private val weakContext: WeakReference<Context> = WeakReference(context)
-    lateinit var onItemClickListener: (stock: AudioFileData) -> Unit
+    lateinit var onItemClickListener: (audioFileData: AudioFileData) -> Unit
 
-    inner class AudioDataViewHolder(private val binding: VhAudioDataListBinding) :
-        RecyclerView.ViewHolder(binding.root) {
+    val onAudioPlayingCompletedListener: MediaPlayer.OnCompletionListener = MediaPlayer.OnCompletionListener {
+        onAudioStoppedPlaying()
+    }
+
+    /**
+     * A view holder for managing the screen display of a single [AudioFileData]
+     */
+    inner class AudioDataViewHolder(val binding: VhAudioDataListBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(audioFileData: AudioFileData, holder: AudioDataViewHolder) {
             binding.audioDataListViewHolderNameTV.text = audioFileData.name
@@ -44,14 +52,22 @@ class AudioDataAdapter(context: Context) :
                     currentlyPlayingViewHolder = holder
                     currentlyPlayedAudio = audioFileData
                 } else {
-                    currentlyPlayingViewHolder = null
-                    currentlyPlayedAudio = null
-                    binding.audioDataViewHolderPlayPauseIV.setImageResource(R.drawable.ic_play_black)
+                    onAudioStoppedPlaying()
                 }
                 onItemClickListener.invoke(audioFileData)
             }
         }
+    }
 
+    /**
+     * Called whenever a audio file pauses or finished playing with no interruption.
+     * If throughout its playing time a new audio file will be asked to play, the method will not be called
+     */
+    private fun onAudioStoppedPlaying() {
+        Log.d(TAG, "Setting viewHolder to 'Not playing' mode ")
+        currentlyPlayingViewHolder?.binding?.audioDataViewHolderPlayPauseIV?.setImageResource(R.drawable.ic_play_black)
+        currentlyPlayedAudio = null
+        currentlyPlayingViewHolder = null
     }
 
     override fun getItemId(position: Int): Long = position.toLong()

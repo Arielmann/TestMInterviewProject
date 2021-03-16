@@ -21,6 +21,13 @@ class AudioFilesRepository @Inject constructor(private val audioFilesNetworkServ
         private val TAG: String? = AudioFilesRepository::class.simpleName
     }
 
+    /**
+     * Starts an operation if network is available for the client. Otherwise throws a [NetworkErrorException]
+     *
+     * @param operation The desired operation for execution
+     *
+     * @throws NetworkErrorException if network is not available
+     */
     private suspend fun <T> startOperationIfNetworkAvailable(operation: suspend () -> T) {
         val context = DemoSDKApp.context
         if (isNetworkAvailable(context)) {
@@ -31,8 +38,13 @@ class AudioFilesRepository @Inject constructor(private val audioFilesNetworkServ
         }
     }
 
-    suspend fun fetchAudioDataList(qrURL: String,
-                                   networkCallback: NetworkCallback<List<AudioFileData>>) {
+    /**
+     * Downloading the data regarding the entire list of files
+     *
+     * @param qrURL URL of the desired data
+     * @param networkCallback a callback for updating the operation's status
+     */
+    suspend fun fetchAudioDataList(qrURL: String, networkCallback: NetworkCallback<List<AudioFileData>>) {
 
         try {
             startOperationIfNetworkAvailable {
@@ -40,8 +52,7 @@ class AudioFilesRepository @Inject constructor(private val audioFilesNetworkServ
                 val call = audioFilesNetworkService.fetchAudioData(qrURL)
 
                 call.enqueue(object : Callback<List<AudioFileData>> {
-                    override fun onResponse(call: Call<List<AudioFileData>>,
-                                            response: Response<List<AudioFileData>>) {
+                    override fun onResponse(call: Call<List<AudioFileData>>, response: Response<List<AudioFileData>>) {
                         Log.d(TAG, "Audio data fetch response: $response")
                         if (response.body() != null && response.isSuccessful) {
                             if (response.body() != null) {
@@ -63,7 +74,7 @@ class AudioFilesRepository @Inject constructor(private val audioFilesNetworkServ
 
             }
         } catch (e: Exception) {
-            val errorMsg = "fetchAudioDataListL: A problem has occurred within the retrofit framework"
+            val errorMsg = "fetchAudioDataListL: An error has occurred but was caught not caught within the retrofit designated failure mechanism"
             Log.e(TAG, errorMsg)
             e.printStackTrace()
             networkCallback.onFailure(errorMsg)
@@ -71,8 +82,13 @@ class AudioFilesRepository @Inject constructor(private val audioFilesNetworkServ
 
     }
 
-    suspend fun downloadAudioFile(audioFileData: AudioFileData,
-                                  networkCallback: NetworkCallback<ResponseBody>) {
+    /**
+     * Downloads a single audio file
+     *
+     * @param audioFileData Data regarding the target file for download
+     * @param networkCallback a callback for updating the operation's status
+     */
+    suspend fun downloadAudioFile(audioFileData: AudioFileData, networkCallback: NetworkCallback<ResponseBody>) {
         try {
             Log.d(TAG, "Downloading audio file: ${audioFileData.name}")
             val response: Response<ResponseBody>? =
@@ -93,7 +109,7 @@ class AudioFilesRepository @Inject constructor(private val audioFilesNetworkServ
                 networkCallback.onFailure(response.errorBody().toString())
             }
         } catch (e: Exception) {
-            val errorMsg = "downloadAudioFile: A problem has occurred within the retrofit framework "
+            val errorMsg = "downloadAudioFile: An error has occurred but was caught not caught within the retrofit designated failure mechanism"
             Log.e(TAG, errorMsg)
             e.printStackTrace()
             networkCallback.onFailure(errorMsg)

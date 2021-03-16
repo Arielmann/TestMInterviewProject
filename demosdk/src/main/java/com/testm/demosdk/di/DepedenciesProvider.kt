@@ -1,6 +1,7 @@
 package com.testm.demosdk.di
 
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
+import com.testm.demosdk.audioplayer.AudioPlayer
 import com.testm.demosdk.network.AudioFilesNetworkService
 import com.testm.demosdk.repository.AudioFilesRepository
 import dagger.Module
@@ -20,7 +21,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object RetrofitModule {
 
-    val retrofit = Retrofit.Builder()
+    private val retrofit: Retrofit = Retrofit.Builder()
         .addConverterFactory(GsonConverterFactory.create())
         .addCallAdapterFactory(CoroutineCallAdapterFactory())
         .baseUrl("https://dummy.url/") //Since we only fetch a full url address at runtime, we can workaround retrofit's request for a base url
@@ -41,5 +42,16 @@ object RepositoriesModule {
     @Provides
     fun provideAudioFilesRepository(audioFilesNetworkService: AudioFilesNetworkService): AudioFilesRepository {
         return AudioFilesRepository(audioFilesNetworkService)
+    }
+}
+
+@Module
+@InstallIn(ViewModelComponent::class)
+object AudioPlayerModule {
+
+    @ViewModelScoped
+    @Provides
+    fun provideAudioPlayer(): AudioPlayer {
+        return AudioPlayer()
     }
 }

@@ -13,19 +13,17 @@ import androidx.recyclerview.widget.DiffUtil
 @Suppress("UnnecessaryVariable") class DefaultDiffUtilCallback<T : ObjectIdentifier> : DiffUtil.ItemCallback<T>() {
 
     companion object {
-        private val TAG = DefaultDiffUtilCallback::class.qualifiedName
+        @Suppress("unused") private val TAG = DefaultDiffUtilCallback::class.qualifiedName
     }
 
     override fun areItemsTheSame(oldItem: T, newItem: T): Boolean {
         val areSame = oldItem.getUniqueProperty() == newItem.getUniqueProperty()
-//        Log.d(TAG, "areItemsTheSame? ".plus(areSame))
         return areSame
     }
 
     @SuppressLint("DiffUtilEquals")
     override fun areContentsTheSame(oldItem: T, newItem: T): Boolean {
         val areSame = oldItem == newItem
-//        Log.d(TAG, "areContentsTheSame? ".plus(areSame))
         return areSame
     }
 }

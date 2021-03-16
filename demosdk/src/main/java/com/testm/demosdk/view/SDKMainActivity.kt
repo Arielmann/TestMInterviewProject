@@ -10,12 +10,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.zxing.integration.android.IntentIntegrator
 import com.testm.demosdk.R
-import com.testm.demosdk.audioplayer.AudioPlayer
 import com.testm.demosdk.databinding.ActivitySdkMainBinding
 import com.testm.demosdk.events.DemoSDKEvent
 import com.testm.demosdk.viewmodel.SDKViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
+/**
+ * The main activity of the sdk. Responsible for starting the barcode scan process
+ * and displaying its results
+ */
 @AndroidEntryPoint
 class SDKMainActivity : AppCompatActivity() {
 
@@ -71,30 +74,45 @@ class SDKMainActivity : AppCompatActivity() {
             } ?: Log.w(TAG, "No audio data received")
         })
 
-        observeErrorEvent(sdkViewModel.qrCodeScanErrorEvent, getString(R.string.error_qr_scan_failed))
-        observeErrorEvent(sdkViewModel.audioDataListDownloadErrorEvent, getString(R.string.error_audio_data_fetch_failed))
-        observeErrorEvent(sdkViewModel.scanCanceledEvent, getString(R.string.event_message_scan_cancelled))
+        observeFailureScenario(sdkViewModel.qrCodeScanErrorEvent, getString(R.string.error_qr_scan_failed))
+        observeFailureScenario(sdkViewModel.audioDataListDownloadErrorEvent, getString(R.string.error_audio_data_fetch_failed))
+        observeFailureScenario(sdkViewModel.scanCanceledEvent, getString(R.string.event_message_scan_cancelled))
     }
 
+    /**
+     * Displaying the title and progressbar and hiding any error messages\views
+     */
     private fun showProgressionUI() {
         binding.progressBar.show()
         binding.restartProcessIV.visibility = View.INVISIBLE
         binding.errorTV.visibility = View.INVISIBLE
+        binding.titleTV.visibility = View.VISIBLE
     }
 
+    /**
+     * Hiding the progressbar and hiding any error messages\views
+     */
     private fun hideProgressionUI() {
         binding.progressBar.hide()
         binding.errorTV.visibility = View.INVISIBLE
-        binding.restartProcessIV.visibility = View.INVISIBLE
+        binding.titleTV.visibility = View.VISIBLE
     }
 
-    private fun observeErrorEvent(errorEvent: MutableLiveData<DemoSDKEvent>, errorMsg: String = getString(R.string.error_unknown_failure)) {
-        errorEvent.observe(this, { event ->
-            event?.let {
-                if (event.message.isNotBlank()) {
-                    onDataDisplayRequestFailed(event.message)
+
+    /**
+     * Defining the UI display after an unsuccessful scenario (not necessarily an error)
+     *
+     * @param event The occurring event
+     * @param message Message to be displayed to the user
+     */
+    private fun observeFailureScenario(event: MutableLiveData<DemoSDKEvent>,
+                                       message: String = getString(R.string.error_unknown_failure)) {
+        event.observe(this, { result ->
+            result?.let {
+                if (result.message.isNotBlank()) {
+                    onDataDisplayRequestFailed(result.message)
                 } else {
-                    onDataDisplayRequestFailed(errorMsg)
+                    onDataDisplayRequestFailed(message)
                 }
             } ?: onDataDisplayRequestFailed(getString(R.string.error_null_event))
         })
@@ -106,10 +124,10 @@ class SDKMainActivity : AppCompatActivity() {
     private fun setupAudioFilesList() {
         audioDataAdapter = AudioDataAdapter(this)
         audioDataAdapter.setHasStableIds(true)
+        sdkViewModel.audioPlayer.onAudioPlayingCompletedListener = audioDataAdapter.onAudioPlayingCompletedListener
 
         audioDataAdapter.onItemClickListener = { audioData ->
-            AudioPlayer.onAudioFileClicked(audioData)
-//            sdkViewModel.onAudioFileClicked(audioData)
+            sdkViewModel.audioPlayer.onAudioFileClicked(audioData)
         }
 
         binding.audioDataRV.apply {
@@ -126,6 +144,7 @@ class SDKMainActivity : AppCompatActivity() {
         binding.progressBar.hide()
         binding.errorTV.text = reason
         binding.errorTV.visibility = View.VISIBLE
+        binding.titleTV.visibility = View.INVISIBLE
         binding.restartProcessIV.visibility = View.VISIBLE
         binding.restartProcessIV.setImageResource(R.drawable.ic_baseline_refresh_gray_48)
     }

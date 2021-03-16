@@ -5,12 +5,13 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.testm.demosdk.utils.Utils
 import com.google.zxing.integration.android.IntentIntegrator
+import com.testm.demosdk.audioplayer.AudioPlayer
 import com.testm.demosdk.events.DemoSDKEvent
 import com.testm.demosdk.model.AudioFileData
 import com.testm.demosdk.network.NetworkCallback
 import com.testm.demosdk.repository.AudioFilesRepository
+import com.testm.demosdk.utils.Utils
 import com.testm.demosdk.view.SDKMainActivity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -18,8 +19,12 @@ import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 import javax.inject.Inject
 
+/**
+ * A viewModel built for the [SDKMainActivity]. Responsible for parsing the barcode scan results
+ * and managing the [AudioFileData] obtained throughout the downloading process
+ */
 @HiltViewModel
-class SDKViewModel @Inject constructor(private val audioDataRepository: AudioFilesRepository) :
+class SDKViewModel @Inject constructor(private val audioDataRepository: AudioFilesRepository, val audioPlayer: AudioPlayer) :
     ViewModel() {
 
     companion object {
@@ -98,10 +103,15 @@ class SDKViewModel @Inject constructor(private val audioDataRepository: AudioFil
         }
     }
 
+    /**
+    Notifies observers that a new [AudioFileData] is available
+     */
     private fun notifyNewAudioFileAvailable(audioFileData: AudioFileData) {
         Log.d(TAG, "${audioFileData.name} will be added to playlist list")
         audioFiles.value!![audioFileData.url] = audioFileData
         audioFiles.postValue(audioFiles.value!!)
     }
+
+
 
 }

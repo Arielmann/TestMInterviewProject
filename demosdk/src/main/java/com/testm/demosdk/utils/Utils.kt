@@ -1,22 +1,26 @@
 package com.testm.demosdk.utils
 
-import android.R.attr.data
 import android.content.Context
-import android.content.ContextWrapper
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.util.Log
-import android.widget.Toast
 import com.testm.demosdk.app.DemoSDKApp
 import okhttp3.ResponseBody
-import java.io.*
+import java.io.File
 
 
 object Utils {
 
     private val TAG = Utils::class.simpleName
 
+    /**
+     * Checks whether a internet connection is available
+     *
+     * @param context A context for preparing the operation
+     *
+     * @return tre if an internet connection is available
+     */
     @Suppress("DEPRECATION")
     fun isNetworkAvailable(context: Context?): Boolean {
         if (context == null) return false
@@ -66,7 +70,6 @@ object Utils {
             return true
 
         } catch (e: java.lang.Exception) {
-            // TODO Auto-generated catch block
             e.printStackTrace()
         }
         Log.e(TAG, "Error in file saving for file $fileName")
@@ -74,6 +77,11 @@ object Utils {
     }
 
 
+    /**
+     * Obtains the dir where the audio files are to be saved
+     *
+     * @return A dir where the audio files are to be saved
+     */
     fun getAudioFilesParentDir(): File {
         return DemoSDKApp.context.filesDir
     }

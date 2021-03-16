@@ -9,7 +9,7 @@ import dagger.hilt.android.HiltAndroidApp
 class DemoSDKApp : Application() {
 
     companion object {
-        val APP_TAG = DemoSDKApp::class.simpleName
+        @Suppress("unused") val APP_TAG = DemoSDKApp::class.simpleName
         @SuppressLint("StaticFieldLeak") //It's the app's context. It should move around freely and get collected when the app gets terminated
         lateinit var context: Context
     }
