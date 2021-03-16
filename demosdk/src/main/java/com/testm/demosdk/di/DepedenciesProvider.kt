@@ -23,7 +23,6 @@ object RetrofitModule {
 
     private val retrofit: Retrofit = Retrofit.Builder()
         .addConverterFactory(GsonConverterFactory.create())
-        .addCallAdapterFactory(CoroutineCallAdapterFactory())
         .baseUrl("https://dummy.url/") //Since we only fetch a full url address at runtime, we can workaround retrofit's request for a base url
         .build()
 
